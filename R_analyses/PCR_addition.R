@@ -1,0 +1,116 @@
+# Libraries
+library(Matrix)
+library(Seurat)
+library(ggplot2)
+library(viridisLite)
+library(scCustomize)
+library(dplyr)
+
+# Loading Seurat Objects
+data6_full <- loadRDS("data6_fullclustering_with_label.RDS")
+data6_reduced <- loadRDS("data6_reducedclustering_with_label.RDS")
+data6_full[["CellName"]] <- colnames(data6_full)
+data6_reduced[["CellName"]] <- colnames(data6_reduced)
+
+list_enhancer <- c("eve_late_variant","h_stripe1","salm_blastoderm_early_enhancer","twi_CHIP-42","vnd_743","CHIP-27","prd01","psc_E14","shg_A",
+                "SoxN_5830","GMR77A12","GMR83E01","CRM1","CRM2","CRM3","CRM4","CRM5","CRM6","CRM7","CRM8","CRM9","CRM10","CRM11","CRM12","CRM13")
+
+
+#### Comparing PCR discoveries against scRNA-seq results
+## In every for loop forward you can change both the PCR list of cells but depending on the one you choose, you have to change the scdataset in the loop
+## ( full -> data6_filtre_list.intgrated / reduced -> data6_reduced)
+
+df_all_list_PCR_full <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_full_version_merged.tsv",sep="\t", header=T)
+#df_61_list_PCR_full <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_full_version_6_1.tsv",sep="\t", header=T)
+#df_62_list_PCR_full <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_full_version_6_2.tsv",sep="\t", header=T)
+#df_63_list_PCR_full <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_full_version_6_3.tsv",sep="\t", header=T)
+df_all_list_PCR_reduced <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_reduced_version_merged.tsv",sep="\t",header=T)
+#df_61_list_PCR_reduced <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_reduced_version_6_1.tsv",sep="\t", header=T)
+#df_62_list_PCR_reduced <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_reduced_version_6_2.tsv",sep="\t", header=T)
+#df_63_list_PCR_reduced <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_reduced_version_6_3.tsv",sep="\t", header=T)
+
+# computing the number of cell discovered by the PCR alone
+for (elem in df_all_list_PCR_reduced$enhancer){
+  print(elem)
+  print(length(unlist(strsplit(df_all_list_PCR_reduced$liste[df_all_list_PCR_reduced$enhancer==elem],","))))
+}
+
+for (elem in df_all_list_PCR_full$enhancer){
+  print(elem)
+  print(length(unlist(strsplit(df_all_list_PCR_full$liste[df_all_list_PCR_full$enhancer==elem],","))))
+}
+
+# Computing the number of cell per enhancer per sc cluster from the PCR only
+for (elem in df_all_list_PCR_reduced$enhancer){
+  print(elem)
+  spe_cell <- unlist(strsplit(df_all_list_PCR_reduced$liste[df_all_list_PCR_reduced$enhancer==elem],","))
+  test_subset <- subset(data6_reduced, subset = CellName %in% spe_cell)
+  print(table(Idents(test_subset)))
+}
+
+# Computing the number of cell per enhancer per sc cluster from the PCR only
+for (elem in df_all_list_PCR_full$enhancer){
+  print(elem)
+  spe_cell <- unlist(strsplit(df_all_list_PCR_full$liste[df_all_list_PCR_full$enhancer==elem],","))
+  test_subset <- subset(data6_full, subset = CellName %in% spe_cell)
+  print(table(Idents(test_subset)))
+}
+
+# Computing the number of cell in common between sc and PCR for each enhancer
+for (elem in df_all_list_PCR_reduced$enhancer){
+  print(elem)
+  expr <- FetchData(data6_reduced, vars=elem)
+  if (max(expr)==0) next
+  print(length(intersect(Cells(data6_reduced[,which(expr>0)]),unlist(strsplit(df_all_list_PCR_reduced$liste[df_all_list_PCR_reduced$enhancer==elem],",")))))
+}
+
+for (elem in df_all_list_PCR_full$enhancer){
+  print(elem)
+  expr <- FetchData(data6_full, vars=elem)
+  if (max(expr)==0) next
+  print(length(intersect(Cells(data6_full[,which(expr>0)]),unlist(strsplit(df_all_list_PCR_full$liste[df_all_list_PCR_full$enhancer==elem],",")))))
+}
+
+
+# Computing the number of cell per enhancer per sc cluster after merging unique cell barcodes from both PCR and sc analyses
+for (elem in list_enhancer){
+  print(elem)
+  res <- try(FetchData(data6_reduced,vars = elem))
+  if (inherits(res, "try-error")){list_sc <- c()}
+  else{
+    expr <- FetchData(data6_reduced,vars = elem)
+    res <- try(Cells(data6_reduced[,which(x=expr > 0)]))
+    if (inherits(res, "try-error")){list_sc <- c()}
+    else{list_sc <- Cells(data6_reduced[,which(x=expr > 0)])}
+  }
+  list_pcr <- df_all_list_PCR_reduced$liste[df_all_list_PCR_reduced$enhancer==elem]
+  double_list <- paste(list_sc,list_pcr,sep=",")
+  unique_list <- unique(unlist(strsplit(double_list,",")))
+  if (is.null(unique_list)){next}
+  else{
+    test_subset <- subset(data6_reduced, subset = CellName %in% unique_list)
+    print(table(Idents(test_subset)))
+  }
+}
+
+# Computing the number of cell per enhancer per sc cluster after merging unique cell barcodes from both PCR and sc analyses
+for (elem in list_enhancer){
+  print(elem)
+  res <- try(FetchData(data6_full,vars = elem))
+  if (inherits(res, "try-error")){list_sc <- c()}
+  else{
+    expr <- FetchData(data6_full,vars = elem)
+    res <- try(Cells(data6_full[,which(x=expr > 0)]))
+    if (inherits(res, "try-error")){list_sc <- c()}
+    else{list_sc <- Cells(data6_full[,which(x=expr > 0)])}
+  }
+  list_pcr <- df_all_list_PCR_full$liste[df_all_list_PCR_full$enhancer==elem]
+  double_list <- paste(list_sc,list_pcr,sep=",")
+  unique_list <- unique(unlist(strsplit(double_list,",")))
+  if (is.null(unique_list)){next}
+  else{
+    test_subset <- subset(data6_full, subset = CellName %in% unique_list)
+    print(table(Idents(test_subset)))
+  }
+}
+
