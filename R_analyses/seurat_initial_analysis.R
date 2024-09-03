@@ -9,19 +9,19 @@ library(dplyr)
 
 # Preprocessing of all three replicates 
 ##Creating seurat objects and computing ribosomal and mitochondrial gene expression percentages
-rawdata_61 <-Read10X(data.dir = "/media/data/people/baptiste/project_sc_novosparc/mapping/mapping_6_1_scRNAseq_27E_061123/outs/filtered_feature_bc_matrix/")
+rawdata_61 <-Read10X(data.dir = "/media/data/people/baptiste/project_sc_novosparc/mapping/filtered_feature_bc_matrix_61/")
 data_61 <-CreateSeuratObject(counts= rawdata_61, min.cells =3, min.genes =200, project ="rep1") 
 data_61 # 24886 cells
 data_61[["percent.rb"]] <- PercentageFeatureSet(data_61, pattern="m?Rp|28SrRNA|18SrRNA")
 data_61[["percent.mt"]] <- PercentageFeatureSet(data_61, pattern="mt:")
 
-rawdata_62 <-Read10X(data.dir = "/media/data/people/baptiste/project_sc_novosparc/mapping/mapping_6_2_scRNAseq_27E_061123/outs/filtered_feature_bc_matrix/")
+rawdata_62 <-Read10X(data.dir = "/media/data/people/baptiste/project_sc_novosparc/mapping/filtered_feature_bc_matrix_62/")
 data_62 <-CreateSeuratObject(counts= rawdata_62, min.cells =3, min.genes =200, project ="rep2") 
 data_62 # 23125 cells
 data_62[["percent.rb"]] <- PercentageFeatureSet(data_62, pattern="m?Rp|28SrRNA|18SrRNA")
 data_62[["percent.mt"]] <- PercentageFeatureSet(data_62, pattern="mt:")
 
-rawdata_63 <-Read10X(data.dir = "/media/data/people/baptiste/project_sc_novosparc/mapping/mapping_6_3_scRNAseq_27E_061123/outs/filtered_feature_bc_matrix/")
+rawdata_63 <-Read10X(data.dir = "/media/data/people/baptiste/project_sc_novosparc/mapping/filtered_feature_bc_matrix_63")
 data_63 <-CreateSeuratObject(counts= rawdata_63, min.cells =3, min.genes =200, project ="rep3") 
 data_63 # 23437 cells
 data_63[["percent.rb"]] <- PercentageFeatureSet(data_63, pattern="m?Rp|28SrRNA|18SrRNA")
@@ -165,27 +165,35 @@ saveRDS(data6_filtre_list.integrated,file="data6_fullclustering_with_label.RDS")
 ### Post processing of the full version of the clustering
 # Number of cell per enhancer
 DefaultAssay(data6_filtre_list.integrated) <- "RNA"
-list_enhancer=c("eve_late_variant","h_stripe1","salm_blastoderm_early_enhancer","twi_CHIP-42","vnd_743","CHIP-27","prd01","psc_E14","shg_A",
-                "SoxN_5830","GMR77A12","GMR83E01","CRM1","CRM2","CRM3","CRM4","CRM5","CRM6","CRM7","CRM8","CRM9","CRM10","CRM11","CRM12","CRM13")
+data6_filtre_list.integrated[["CellName"]] <- colnames(data6_filtre_list.integrated)
+list_enhancer=c("eve-late-variant","h-stripe1","salm-blastoderm-early-enhancer","twi-CHIP-42","Vnd-743","CHIP-27","prd01","pscE14","shg-A",
+                "SoxN-5830","GMR77A12","GMR83E01","CRM1","CRM2","CRM3","CRM4","CRM5","CRM6","CRM7","CRM8","CRM9","CRM10","CRM11","CRM12","CRM13")
+
 Id_cells_with_enhancers_sc <- data.frame(matrix(ncol=3,nrow=0))
 names(Id_cells_with_enhancers_sc) <- c("enhancer","sc_cells_sc_only","nb_cells_sc_only")
 for (elem in list_enhancer){
-	print(elem)
+  print(elem)
   res <- try(FetchData(data6_filtre_list.integrated,vars = elem))
-  if (inherits(res, "try-error")){Id_cells_with_enhancers_sc[nrow(Id_cells_with_enhancers_sc)+1,] = c(elem,,0)}
-	else{
+  if (inherits(res, "try-error")){Id_cells_with_enhancers_sc[nrow(Id_cells_with_enhancers_sc)+1,] = c(elem,'',0)}
+  else{
     expr <- FetchData(data6_filtre_list.integrated,vars = elem)
-    list_cell <- paste(Cells(data6_filtre_list.integrated[,which(x=expr > 0)]),collapse = ",")
-    Id_cells_with_enhancers_sc[nrow(Id_cells_with_enhancers_sc) +1,] = c(elem,list_cell,length(list_cell))
+    res2 <- try(Cells(data6_filtre_list.integrated[,which(x=expr > 0)]))
+    if (inherits(res2,"try-error")){Id_cells_with_enhancers_sc[nrow(Id_cells_with_enhancers_sc)+1,] = c(elem,'',0)}
+    else{
+      list_cell <- Cells(data6_filtre_list.integrated[,which(x=expr > 0)])
+      Id_cells_with_enhancers_sc[nrow(Id_cells_with_enhancers_sc) +1,] = c(elem,paste(list_cell,collapse = ","),length(list_cell))
+    }
+  }
 }
 write.csv(x = Id_cells_with_enhancers_sc,file = "ID_cells_with_enhancers_sc_fullclustering.csv")
 
 # Computing the number of cell per enhancer per sc cluster from sc only
 for (elem in list_enhancer){
   print(elem)
-  expr <- FetchData(data6_reduced,vars = elem)
-  list_sc <- Cells(data6_reduced[,which(x=expr > 0)])
-  test_subset <- subset(data6_reduced, subset = CellName %in% list_sc)
+  if (elem %in% c("CRM5","CRM8")){next}
+  expr <- FetchData(data6_filtre_list.integrated,vars = elem)
+  list_sc <- Cells(data6_filtre_list.integrated[,which(x=expr > 0)])
+  test_subset <- subset(data6_filtre_list.integrated, subset = CellName %in% list_sc)
   print(table(Idents(test_subset)))
 }
 
@@ -202,7 +210,6 @@ ElbowPlot(data6_wo_rb, ndims = 30)+xlab("Principal Components")+theme(axis.title
 data6_wo_rb <- FindNeighbors(data6_wo_rb, dims = 1:30)
 data6_wo_rb <- FindClusters(data6_wo_rb, resolution = 0.5)
 data6_wo_rb <- RunUMAP(data6_wo_rb, dims = 1:30,min.dist=0.5)
-DimPlot(data6_wo_rb, reduction = "umap", label=TRUE, label.size = 5, pt.size = 1.15,repel = TRUE,label.box = TRUE) +NoLegend()
 
 # Changing cells name and saving them and the matrix for PCR and novosparc analyses
 id_cells_6_int <- Cells(data6_wo_rb)
@@ -270,7 +277,7 @@ data6_wo_rb <- RenameIdents(data6_wo_rb,
 # Saving UMAPs
 DimPlot_scCustom(data6_wo_rb, reduction = "umap", label=TRUE, label.size = 5, pt.size = 1.15,repel = TRUE,label.box = TRUE)
 
-saveRDS(object = data6_wo_rb, file="stage6_reduced_clustering_object.RDS")
+saveRDS(object = data6_wo_rb, file="data6_reducedclustering_with_label.RDS")
 
 # Collecting all cells ID for each cluster to plot them on novosparc later
 Id_cells_per_clusters <- data.frame(matrix(ncol=2,nrow=0))
@@ -285,20 +292,33 @@ write.csv(x = Id_cells_per_clusters,file = "Id_cells_per_clusters_reduced.csv",r
 ### Post processing
 # Number of cell per enhancer
 DefaultAssay(data6_wo_rb) <- "RNA"
-list_enhancer=c("eve_late_variant","h_stripe1","salm_blastoderm_early_enhancer","twi_CHIP-42","vnd_743","CHIP-27","prd01","psc_E14","shg_A",
-                "SoxN_5830","GMR77A12","GMR83E01","CRM1","CRM2","CRM3","CRM4","CRM5","CRM6","CRM7","CRM8","CRM9","CRM10","CRM11","CRM12","CRM13")
+list_enhancer=c("eve-late-variant","h-stripe1","salm-blastoderm-early-enhancer","twi-CHIP-42","Vnd-743","CHIP-27","prd01","pscE14","shg-A",
+                "SoxN-5830","GMR77A12","GMR83E01","CRM1","CRM2","CRM3","CRM4","CRM5","CRM6","CRM7","CRM8","CRM9","CRM10","CRM11","CRM12","CRM13")
 
 Id_cells_with_enhancers_sc <- data.frame(matrix(ncol=3,nrow=0))
 names(Id_cells_with_enhancers_sc) <- c("enhancer","sc_cells_sc_only","nb_cells_sc_only")
 for (elem in list_enhancer){
   print(elem)
   res <- try(FetchData(data6_wo_rb,vars = elem))
-  if (inherits(res, "try-error")){Id_cells_with_enhancers_sc[nrow(Id_cells_with_enhancers_sc)+1,] = c(elem,,0)}
+  if (inherits(res, "try-error")){Id_cells_with_enhancers_sc[nrow(Id_cells_with_enhancers_sc)+1,] = c(elem,'',0)}
   else{
     expr <- FetchData(data6_wo_rb,vars = elem)
-    list_cell <- paste(Cells(data6_wo_rb[,which(x=expr > 0)]),collapse = ",")
-    Id_cells_with_enhancers_sc[nrow(Id_cells_with_enhancers_sc) +1,] = c(elem,list_cell,length(list_cell))
+    res2 <- try(Cells(data6_wo_rb[,which(x=expr > 0)]))
+    if (inherits(res2,"try-error")){Id_cells_with_enhancers_sc[nrow(Id_cells_with_enhancers_sc)+1,] = c(elem,'',0)}
+    else{
+      list_cell <- Cells(data6_wo_rb[,which(x=expr > 0)])
+      Id_cells_with_enhancers_sc[nrow(Id_cells_with_enhancers_sc) +1,] = c(elem,paste(list_cell,collapse = ","),length(list_cell))
+    }
+  }
 }
-write.csv(x = Id_cells_with_enhancers_sc,file = "ID_cells_with_enhancers_sc_reducedclustering.csv")
+write.csv(x = Id_cells_with_enhancers_sc,file = "ID_cells_with_enhancers_sc_reduced_clustering.csv")
 
+for (elem in list_enhancer){
+  print(elem)
+  if (elem %in% c("CRM5","CRM8","pscE14")){next}
+  expr <- FetchData(data6_filtre_list.integrated,vars = elem)
+  list_sc <- Cells(data6_filtre_list.integrated[,which(x=expr > 0)])
+  test_subset <- subset(data6_filtre_list.integrated, subset = CellName %in% list_sc)
+  print(table(Idents(test_subset)))
+}
 

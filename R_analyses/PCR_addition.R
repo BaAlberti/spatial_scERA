@@ -12,28 +12,32 @@ data6_reduced <- loadRDS("data6_reducedclustering_with_label.RDS")
 data6_full[["CellName"]] <- colnames(data6_full)
 data6_reduced[["CellName"]] <- colnames(data6_reduced)
 
-list_enhancer <- c("eve_late_variant","h_stripe1","salm_blastoderm_early_enhancer","twi_CHIP-42","vnd_743","CHIP-27","prd01","psc_E14","shg_A",
-                "SoxN_5830","GMR77A12","GMR83E01","CRM1","CRM2","CRM3","CRM4","CRM5","CRM6","CRM7","CRM8","CRM9","CRM10","CRM11","CRM12","CRM13")
+list_enhancer=c("eve-late-variant","h-stripe1","salm-blastoderm-early-enhancer","twi-CHIP-42","Vnd-743","CHIP-27","prd01","pscE14","shg-A",
+                "SoxN-5830","GMR77A12","GMR83E01","CRM1","CRM2","CRM3","CRM4","CRM5","CRM6","CRM7","CRM8","CRM9","CRM10","CRM11","CRM12","CRM13")
 
 
 #### Comparing PCR discoveries against scRNA-seq results
 ## In every for loop forward you can change both the PCR list of cells but depending on the one you choose, you have to change the scdataset in the loop
 ## ( full -> data6_filtre_list.intgrated / reduced -> data6_reduced)
 
-df_all_list_PCR_full <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_full_version_merged.tsv",sep="\t", header=T)
-#df_61_list_PCR_full <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_full_version_6_1.tsv",sep="\t", header=T)
-#df_62_list_PCR_full <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_full_version_6_2.tsv",sep="\t", header=T)
-#df_63_list_PCR_full <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_full_version_6_3.tsv",sep="\t", header=T)
-df_all_list_PCR_reduced <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_reduced_version_merged.tsv",sep="\t",header=T)
-#df_61_list_PCR_reduced <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_reduced_version_6_1.tsv",sep="\t", header=T)
-#df_62_list_PCR_reduced <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_reduced_version_6_2.tsv",sep="\t", header=T)
-#df_63_list_PCR_reduced <- read.csv("../../../python_analyses/PCR/stade6/lists_cells_for_each_enhancer_reduced_version_6_3.tsv",sep="\t", header=T)
+df_all_list_PCR_full <- read.csv("../python_analyses/merged_full/lists_cells_for_each_enhancer_full_version_merged.tsv",sep="\t", header=T)
+#df_61_list_PCR_full <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_full_version_6_1.tsv",sep="\t", header=T)
+#df_62_list_PCR_full <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_full_version_6_2.tsv",sep="\t", header=T)
+#df_63_list_PCR_full <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_full_version_6_3.tsv",sep="\t", header=T)
+df_all_list_PCR_reduced <- read.csv("../python_analyses/merged_reduced/lists_cells_for_each_enhancer_reduced_version_merged.tsv",sep="\t",header=T)
+#df_61_list_PCR_reduced <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_reduced_version_6_1.tsv",sep="\t", header=T)
+#df_62_list_PCR_reduced <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_reduced_version_6_2.tsv",sep="\t", header=T)
+#df_63_list_PCR_reduced <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_reduced_version_6_3.tsv",sep="\t", header=T)
 
 # computing the number of cell discovered by the PCR alone
+nb_cell_PCR_alone_reduced <- data.frame(matrix(ncol=2,nrow=0))
+names(Id_cells_with_enhancers_sc) <- c("enhancer","nb_cell_PCR_only")
 for (elem in df_all_list_PCR_reduced$enhancer){
   print(elem)
-  print(length(unlist(strsplit(df_all_list_PCR_reduced$liste[df_all_list_PCR_reduced$enhancer==elem],","))))
+  nb_cell <- length(unlist(strsplit(df_all_list_PCR_reduced$liste[df_all_list_PCR_reduced$enhancer==elem],",")))
+  nb_cell_PCR_alone_reduced[nrow(nb_cell_PCR_alone_reduced) +1,] = c(elem,,length(nb_cell))
 }
+write.csv(x = nb_cell_PCR_alone_reduced,file = "nb_cell_PCR_alone_reduced.csv")
 
 for (elem in df_all_list_PCR_full$enhancer){
   print(elem)
