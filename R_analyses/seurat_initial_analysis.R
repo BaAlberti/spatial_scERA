@@ -9,19 +9,19 @@ library(dplyr)
 
 # Preprocessing of all three replicates 
 ##Creating seurat objects and computing ribosomal and mitochondrial gene expression percentages
-rawdata_61 <-Read10X(data.dir = "/media/data/people/baptiste/project_sc_novosparc/mapping/filtered_feature_bc_matrix_61/")
+rawdata_61 <-Read10X(data.dir = "../data/scRNA-seq_matrix/filtered_feature_bc_matrix_61/")
 data_61 <-CreateSeuratObject(counts= rawdata_61, min.cells =3, min.genes =200, project ="rep1") 
 data_61 # 24886 cells
 data_61[["percent.rb"]] <- PercentageFeatureSet(data_61, pattern="m?Rp|28SrRNA|18SrRNA")
 data_61[["percent.mt"]] <- PercentageFeatureSet(data_61, pattern="mt:")
 
-rawdata_62 <-Read10X(data.dir = "/media/data/people/baptiste/project_sc_novosparc/mapping/filtered_feature_bc_matrix_62/")
+rawdata_62 <-Read10X(data.dir = "../data/scRNA-seq_matrix/filtered_feature_bc_matrix_61/")
 data_62 <-CreateSeuratObject(counts= rawdata_62, min.cells =3, min.genes =200, project ="rep2") 
 data_62 # 23125 cells
 data_62[["percent.rb"]] <- PercentageFeatureSet(data_62, pattern="m?Rp|28SrRNA|18SrRNA")
 data_62[["percent.mt"]] <- PercentageFeatureSet(data_62, pattern="mt:")
 
-rawdata_63 <-Read10X(data.dir = "/media/data/people/baptiste/project_sc_novosparc/mapping/filtered_feature_bc_matrix_63")
+rawdata_63 <-Read10X(data.dir = "../data/scRNA-seq_matrix/filtered_feature_bc_matrix_61/")
 data_63 <-CreateSeuratObject(counts= rawdata_63, min.cells =3, min.genes =200, project ="rep3") 
 data_63 # 23437 cells
 data_63[["percent.rb"]] <- PercentageFeatureSet(data_63, pattern="m?Rp|28SrRNA|18SrRNA")
@@ -83,7 +83,7 @@ write.csv(id_cells_6_int, file="id_cells_6_int_full_clusters.csv", row.names = F
 write.table(data6_filtre_list.integrated@assays$RNA@counts,file = "matrice_6_int_full_clusters.csv",quote=FALSE,sep=',',col.names=TRUE)
 
 # Saving the seurat object before annotation
-saveRDS(data6_filtre_list.integrated,file="data6_fullclustering_no_label.RDS")
+saveRDS(data6_filtre_list.integrated,file="../data/seurat_objects/data6_fullclustering_no_label.RDS")
 
 # Identifying the different cell types in the clusters
 cluster.markers_6 <- FindAllMarkers(data6_filtre_list.integrated, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
@@ -145,7 +145,7 @@ data6_filtre_list.integrated <- RenameIdents(data6_filtre_list.integrated,
                                              `15` = "hemocytes")
 
 # Saving UMAPs
-DimPlot_scCustom(data6_filtre_list.integrated, reduction = "umap", label=TRUE, label.size = 5, pt.size = 1.15,repel = TRUE,label.box = TRUE) +NoLegend()
+DimPlot_scCustom(data6_filtre_list.integrated, reduction = "umap", label=TRUE, label.size = 5, pt.size = 1.15,repel = TRUE,label.box = TRUE,ggplot_default_colors = T)
 
 
 # Collecting all cells ID for each cluster to plot them on novosparc later
@@ -159,7 +159,7 @@ for (clust in levels(data6_filtre_list.integrated@active.ident)) {
 write.csv(x = Id_cells_per_clusters,file = "Id_cells_per_clusters_full.csv",row.names=FALSE)
 
 # Saving the seurat object before annotation
-saveRDS(data6_filtre_list.integrated,file="data6_fullclustering_with_label.RDS")
+saveRDS(data6_filtre_list.integrated,file="../data/seurat_objects/data6_fullclustering_with_label.RDS")
 
 
 ### Post processing of the full version of the clustering
@@ -219,7 +219,7 @@ write.csv(id_cells_6_int, file="id_cells_6_int_reduced_clusters.csv", row.names 
 write.table(data6_wo_rb@assays$RNA@counts,file = "matrice_6_int_reduced_clusters.csv",quote=FALSE,sep=',',col.names=TRUE)
 
 # Saving the seurat object before annotation
-saveRDS(data6_wo_rb,file="data6_reducedclustering_no_label.RDS")
+saveRDS(data6_wo_rb,file="../data/seurat_objects/data6_reducedclustering_no_label.RDS")
 
 # Identifying the different cell types in this new dataset
 cluster.markers_6 <- FindAllMarkers(data6_wo_rb, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
@@ -275,9 +275,9 @@ data6_wo_rb <- RenameIdents(data6_wo_rb,
                             `12` = "pole cells")
 
 # Saving UMAPs
-DimPlot_scCustom(data6_wo_rb, reduction = "umap", label=TRUE, label.size = 5, pt.size = 1.15,repel = TRUE,label.box = TRUE)
+DimPlot_scCustom(data6_wo_rb, reduction = "umap", label=TRUE, label.size = 5, pt.size = 1.15,repel = TRUE,label.box = TRUE,ggplot_default_colors = T)
 
-saveRDS(object = data6_wo_rb, file="data6_reducedclustering_with_label.RDS")
+saveRDS(object = data6_wo_rb, file="../data/seurat_objects/data6_reducedclustering_with_label.RDS")
 
 # Collecting all cells ID for each cluster to plot them on novosparc later
 Id_cells_per_clusters <- data.frame(matrix(ncol=2,nrow=0))
