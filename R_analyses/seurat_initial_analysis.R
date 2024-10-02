@@ -9,19 +9,19 @@ library(dplyr)
 
 # Preprocessing of all three replicates 
 ##Creating seurat objects and computing ribosomal and mitochondrial gene expression percentages
-rawdata_61 <-Read10X(data.dir = "../data/scRNA-seq_matrix/filtered_feature_bc_matrix_61/")
+rawdata_61 <-Read10X(data.dir = "../data/scRNA-seq_matrix/filtered_feature_bc_matrix_61/filtered_feature_bc_matrix_61/")
 data_61 <-CreateSeuratObject(counts= rawdata_61, min.cells =3, min.genes =200, project ="rep1") 
 data_61 # 24886 cells
 data_61[["percent.rb"]] <- PercentageFeatureSet(data_61, pattern="m?Rp|28SrRNA|18SrRNA")
 data_61[["percent.mt"]] <- PercentageFeatureSet(data_61, pattern="mt:")
 
-rawdata_62 <-Read10X(data.dir = "../data/scRNA-seq_matrix/filtered_feature_bc_matrix_61/")
+rawdata_62 <-Read10X(data.dir = "../data/scRNA-seq_matrix/filtered_feature_bc_matrix_62/filtered_feature_bc_matrix_62/")
 data_62 <-CreateSeuratObject(counts= rawdata_62, min.cells =3, min.genes =200, project ="rep2") 
 data_62 # 23125 cells
 data_62[["percent.rb"]] <- PercentageFeatureSet(data_62, pattern="m?Rp|28SrRNA|18SrRNA")
 data_62[["percent.mt"]] <- PercentageFeatureSet(data_62, pattern="mt:")
 
-rawdata_63 <-Read10X(data.dir = "../data/scRNA-seq_matrix/filtered_feature_bc_matrix_61/")
+rawdata_63 <-Read10X(data.dir = "../data/scRNA-seq_matrix/filtered_feature_bc_matrix_63/filtered_feature_bc_matrix_63/")
 data_63 <-CreateSeuratObject(counts= rawdata_63, min.cells =3, min.genes =200, project ="rep3") 
 data_63 # 23437 cells
 data_63[["percent.rb"]] <- PercentageFeatureSet(data_63, pattern="m?Rp|28SrRNA|18SrRNA")
@@ -156,7 +156,7 @@ for (clust in levels(data6_filtre_list.integrated@active.ident)) {
   list_cell <- paste(Cells(temp_data),collapse=",")
   Id_cells_per_clusters[nrow(Id_cells_per_clusters) +1,] = c(clust,list_cell)
 }
-write.csv(x = Id_cells_per_clusters,file = "Id_cells_per_clusters_full.csv",row.names=FALSE)
+write.csv(x = Id_cells_per_clusters,file = "../data/seurat_outputs/Id_cells_per_clusters_full.csv",row.names=FALSE)
 
 # Saving the seurat object before annotation
 saveRDS(data6_filtre_list.integrated,file="../data/seurat_objects/data6_fullclustering_with_label.RDS")
@@ -185,7 +185,7 @@ for (elem in list_enhancer){
     }
   }
 }
-write.csv(x = Id_cells_with_enhancers_sc,file = "ID_cells_with_enhancers_sc_fullclustering.csv")
+write.csv(x = Id_cells_with_enhancers_sc,file = "../data/seurat_outputs/ID_cells_with_enhancers_sc_fullclustering.csv")
 
 # Computing the number of cell per enhancer per sc cluster from sc only
 for (elem in list_enhancer){
@@ -287,7 +287,7 @@ for (clust in levels(data6_wo_rb@active.ident)) {
   list_cell <- paste(Cells(temp_data),collapse=",")
   Id_cells_per_clusters[nrow(Id_cells_per_clusters) +1,] = c(clust,list_cell)
 }
-write.csv(x = Id_cells_per_clusters,file = "Id_cells_per_clusters_reduced.csv",row.names=FALSE)
+write.csv(x = Id_cells_per_clusters,file = "../data/seurat_outputs/Id_cells_per_clusters_reduced.csv",row.names=FALSE)
 
 ### Post processing
 # Number of cell per enhancer
@@ -311,7 +311,7 @@ for (elem in list_enhancer){
     }
   }
 }
-write.csv(x = Id_cells_with_enhancers_sc,file = "ID_cells_with_enhancers_sc_reduced_clustering.csv")
+write.csv(x = Id_cells_with_enhancers_sc,file = "../data/seurat_outputs/ID_cells_with_enhancers_sc_reduced_clustering.csv")
 
 for (elem in list_enhancer){
   print(elem)

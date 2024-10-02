@@ -16,4 +16,6 @@ This folder has the dataset used in the tutorial of novosparc.
 **Download at**: lien vers arrayexpress <br>
 This folder contains the 3 different matrices generated after CellRanger mapping. Each matrix is divided in 3 files: the **matrix.mtx** is the count table; **barcode.tsv** contains the cell barcodes (rows of the matrices); and **features.tsv** contains the gene names (columns of the matrix).
 ### seurat_objects
-Stores the generated seurat objects different files used later by novoSpaRc while performing R analysis of the scRNA-seq dataset.
+Stores the generated seurat objects.
+### seurat_outputs
+Stores the generated files comming from the seurat analysis. They are usefull for later analysis with novoSpaRc.
