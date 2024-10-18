@@ -1,3 +1,8 @@
+import matplotlib
+import plotly.graph_objs as go
+import numpy as np
+import pandas as pd
+
 def embedding_3D_plotly(dataset,color,threshold=0.25,title=None,title_fig=None,screenshot=False,PCR_mode=False,pal="viridis"):
     
     """

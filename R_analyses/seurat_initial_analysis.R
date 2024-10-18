@@ -79,8 +79,8 @@ data6_filtre_list.integrated <- RunUMAP(data6_filtre_list.integrated, dims=1:30)
 id_cells_6_int <- Cells(data6_filtre_list.integrated)
 id_cells_6_int <- gsub("-1","",as.character(id_cells_6_int))
 data6_filtre_list.integrated <- RenameCells(data6_filtre_list.integrated,new.names=id_cells_6_int)
-write.csv(id_cells_6_int, file="id_cells_6_int_full_clusters.csv", row.names = FALSE)
-write.table(data6_filtre_list.integrated@assays$RNA@counts,file = "matrice_6_int_full_clusters.csv",quote=FALSE,sep=',',col.names=TRUE)
+write.csv(id_cells_6_int, file="../data/seurat_outputs/id_cells_6_int_full_clusters.csv", row.names = FALSE)
+write.table(data6_filtre_list.integrated@assays$RNA@counts,file = "../data/seurat_outputs/matrice_6_int_full_clusters.csv",quote=FALSE,sep=',',col.names=TRUE)
 
 # Saving the seurat object before annotation
 saveRDS(data6_filtre_list.integrated,file="../data/seurat_objects/data6_fullclustering_no_label.RDS")
@@ -215,8 +215,8 @@ data6_wo_rb <- RunUMAP(data6_wo_rb, dims = 1:30,min.dist=0.5)
 id_cells_6_int <- Cells(data6_wo_rb)
 id_cells_6_int <- gsub("-1","",as.character(id_cells_6_int))
 data6_wo_rb <- RenameCells(data6_wo_rb,new.names=id_cells_6_int)
-write.csv(id_cells_6_int, file="id_cells_6_int_reduced_clusters.csv", row.names = FALSE)
-write.table(data6_wo_rb@assays$RNA@counts,file = "matrice_6_int_reduced_clusters.csv",quote=FALSE,sep=',',col.names=TRUE)
+write.csv(id_cells_6_int, file="../data/seurat_outputs/id_cells_6_int_reduced_clusters.csv", row.names = FALSE)
+write.table(data6_wo_rb@assays$RNA@counts,file = "../data/seurat_outputs/matrice_6_int_reduced_clusters.csv",quote=FALSE,sep=',',col.names=TRUE)
 
 # Saving the seurat object before annotation
 saveRDS(data6_wo_rb,file="../data/seurat_objects/data6_reducedclustering_no_label.RDS")

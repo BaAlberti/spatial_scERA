@@ -17,8 +17,8 @@ DefaultAssay(data6_reduced) <- "RNA"
 list_enhancer=c("eve-late-variant","h-stripe1","salm-blastoderm-early-enhancer","twi-CHIP-42","Vnd-743","CHIP-27","prd01","pscE14","shg-A",
                 "SoxN-5830","GMR77A12","GMR83E01","CRM1","CRM2","CRM3","CRM4","CRM5","CRM6","CRM7","CRM8","CRM9","CRM10","CRM11","CRM12","CRM13")
 
-df_all_list_PCR_full <- read.csv("../python_analyses/merged_full/lists_cells_for_each_enhancer_full_version_merged.tsv",sep="\t", header=T)
-df_all_list_PCR_reduced <- read.csv("../python_analyses/merged_reduced/lists_cells_for_each_enhancer_reduced_version_merged.tsv",sep="\t",header=T)
+df_all_list_PCR_full <- read.csv("../python_analyses/trimming_PCR/merged_full/lists_cells_for_each_enhancer_full_version_merged.tsv",sep="\t", header=T)
+df_all_list_PCR_reduced <- read.csv("../python_analyses/trimming_PCR/merged_reduced/lists_cells_for_each_enhancer_reduced_version_merged.tsv",sep="\t",header=T)
 
 
 
@@ -55,8 +55,6 @@ for (i in c("ectoderm","unknown","procephalic ectoderm","dorsal ectoderm","mesod
   top3=head(clusters,3)
   list_3_gene=c(list_3_gene,top3[,7])
 }
-DoHeatmap(data6_reduced,features=c(list_3_gene,"sog"),size=4)
-list_col <- show_col(hue_pal()(9))
 Clustered_DotPlot(data6_reduced,features=list_3_gene,k=11,colors_use_idents=scCustomize_Palette(11,ggplot_default_colors = T),colors_use_exp=c("lightgrey","#9972ec","green","blue"),column_label_size = 18,legend_label_size=16,row_label_size = 18,plot_km_elbow = FALSE) #colors_use_idents=scCustomize_Palette(11,ggplot_default_colors = T)
 ggsave(filename="clustered_dotplot_full.png",dpi=300,width=12000,height=10000,units="px")
 
@@ -133,7 +131,8 @@ for (elem in df_all_list_PCR_reduced$enhancer){
   Cell_Highlight_Plot(data6_reduced,figure_plot = T,cells_highlight = list("PCR only"=unlist(strsplit(df_all_list_PCR_reduced$liste[df_all_list_PCR_reduced$enhancer==elem],","))),
                       highlight_color = "red",background_color = "lightblue")
   ggsave(filename= paste(elem,"_PCR_dimplot_reduced.png"),dpi=300,width=9,height=7)
-
+}
+  
 # Plotting where the cells for each enhancer for sc and PCR together are in the UMAP
 for (elem in list_enhancer){
   print(elem)

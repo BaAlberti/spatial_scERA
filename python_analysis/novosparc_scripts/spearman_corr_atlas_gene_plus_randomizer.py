@@ -1,7 +1,7 @@
 """
 This script aims at performing a leave-one-out cross-validation.
 The idea is to remove a gene in the atlas, performing the reconstruction, and observed how it is reconstructed compared to its initial pattern in the atlas with a spearman correlation test.
-With this script, each of the 83 genes of the atlas are tested.
+With this script, each of the 84 genes of the atlas are tested.
 To perform a statistical comparison, we compare the spearman score of the reconstruction against a "random" reconstruction where the values are kept the same but ranodmized across the embryo
 This comparison is saved as a boxplot at the end of the script.
 """
@@ -26,7 +26,7 @@ gene_names = dataset.var.index.tolist()
 num_cells, num_genes = dataset.shape
 
 # Loading original atlas
-atlas_dir = '../../novosparc/novosparc/datasets/bdtnp/'
+atlas_dir = '../../data/novosparc_atlas/'
 target_space_path = os.path.join(atlas_dir, 'geometry.txt')
 locations = pd.read_csv(target_space_path, sep=' ')
 num_locations = 3039

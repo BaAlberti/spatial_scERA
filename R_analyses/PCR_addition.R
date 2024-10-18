@@ -22,14 +22,14 @@ list_enhancer=c("eve-late-variant","h-stripe1","salm-blastoderm-early-enhancer",
 ## In every for loop forward you can change both the PCR list of cells but depending on the one you choose, you have to change the scdataset in the loop
 ## ( full -> data6_filtre_list.intgrated / reduced -> data6_reduced)
 
-df_all_list_PCR_full <- read.csv("../python_analyses/merged_full/lists_cells_for_each_enhancer_full_version_merged.tsv",sep="\t", header=T)
-#df_61_list_PCR_full <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_full_version_6_1.tsv",sep="\t", header=T)
-#df_62_list_PCR_full <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_full_version_6_2.tsv",sep="\t", header=T)
-#df_63_list_PCR_full <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_full_version_6_3.tsv",sep="\t", header=T)
-df_all_list_PCR_reduced <- read.csv("../python_analyses/merged_reduced/lists_cells_for_each_enhancer_reduced_version_merged.tsv",sep="\t",header=T)
-#df_61_list_PCR_reduced <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_reduced_version_6_1.tsv",sep="\t", header=T)
-#df_62_list_PCR_reduced <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_reduced_version_6_2.tsv",sep="\t", header=T)
-#df_63_list_PCR_reduced <- read.csv("../python_analyses/individual_full/lists_cells_for_each_enhancer_reduced_version_6_3.tsv",sep="\t", header=T)
+df_all_list_PCR_full <- read.csv("../python_analysis/trimming_PCR/merged_full/lists_cells_for_each_enhancer_full_version_merged.tsv",sep="\t", header=T)
+#df_61_list_PCR_full <- read.csv("../python_analysis/trimming_PCR/individual_full/lists_cells_for_each_enhancer_full_version_6_1.tsv",sep="\t", header=T)
+#df_62_list_PCR_full <- read.csv("../python_analysis/trimming_PCR/individual_full/lists_cells_for_each_enhancer_full_version_6_2.tsv",sep="\t", header=T)
+#df_63_list_PCR_full <- read.csv("../python_analysis/trimming_PCR/individual_full/lists_cells_for_each_enhancer_full_version_6_3.tsv",sep="\t", header=T)
+df_all_list_PCR_reduced <- read.csv("../python_analysis/trimming_PCR/merged_reduced/lists_cells_for_each_enhancer_reduced_version_merged.tsv",sep="\t",header=T)
+#df_61_list_PCR_reduced <- read.csv("../python_analysis/trimming_PCR/individual_full/lists_cells_for_each_enhancer_reduced_version_6_1.tsv",sep="\t", header=T)
+#df_62_list_PCR_reduced <- read.csv("../python_analysis/trimming_PCR/individual_full/lists_cells_for_each_enhancer_reduced_version_6_2.tsv",sep="\t", header=T)
+#df_63_list_PCR_reduced <- read.csv("../python_analysis/trimming_PCR/individual_full/lists_cells_for_each_enhancer_reduced_version_6_3.tsv",sep="\t", header=T)
 
 # computing the number of cell discovered by the PCR alone (full)
 nb_cell_PCR_alone_full <- data.frame(matrix(ncol=2,nrow=0))

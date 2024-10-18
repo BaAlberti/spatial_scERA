@@ -5,8 +5,8 @@ library(ggplot2)
 
 # Loading dataset
 # the normalized dataset can be downloaded at : http://bimsbstatic.mdc-berlin.de/rajewsky/DVEX/dge_normalized.txt.gz
-data_karaiskos <- read.table("data/dge_normalized.txt",header=TRUE,sep="\t")
-data_karaiskos <- CreateSeuratObject(data_karaiskos, project="zinzen")
+data_karaiskos <- read.table("../data/novosparc_dataset/dge_normalized.txt",header=TRUE,sep="\t")
+data_karaiskos <- CreateSeuratObject(data_karaiskos, project="karaiskos")
 
 # Seurat classic pipeline
 data_karaiskos <- FindVariableFeatures(object = data_karaiskos,selection.method = "mvp",verbose = FALSE)
