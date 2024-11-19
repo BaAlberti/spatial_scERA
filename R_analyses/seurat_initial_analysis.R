@@ -93,7 +93,7 @@ for (i in 0:15){
   top10=head(clusters,10)
   list_10_gene=c(list_10_gene,top10[,7])
 }
-write.table(list_10_gene, file="list_markers_6_full_version.csv",row.names=F,col.names=F)
+write.table(list_10_gene, file="../data/seurat_outputs/list_markers_6_full_version.csv",row.names=F,col.names=F)
 
 # #Annotation for each cluster (do not run if you want to label the cluster as in the paper)
 # data6_filtre_list.integrated <- RenameIdents(data6_filtre_list.integrated, 

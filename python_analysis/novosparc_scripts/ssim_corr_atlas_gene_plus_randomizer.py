@@ -18,6 +18,25 @@ from sklearn.metrics import roc_curve, roc_auc_score
 from sklearn.metrics import accuracy_score
 import random
 
+# Defining ssim score
+def ssim_1d_manual(array1, array2):
+    # Constants to stabilize the division
+    C1 = (0.01) ** 2  # Assuming data range of 255 for 8-bit images; adjust as needed
+    C2 = (0.03) ** 2
+    
+    # Mean of each array
+    mu_x = array1.mean()
+    mu_y = array2.mean()
+    
+    # Variance and covariance
+    sigma_x = array1.var()
+    sigma_y = array2.var()
+    sigma_xy = np.cov(array1, array2)[0, 1]
+    
+    # Compute SSIM based on the formula
+    ssim_score = ((2 * mu_x * mu_y + C1) * (2 * sigma_xy + C2)) / ((mu_x**2 + mu_y**2 + C1) * (sigma_x + sigma_y + C2))
+    return ssim_score
+
 # Loading dataset
 dataset=sc.read_h5ad('dataset.h5ad')
 atlas=sc.read_h5ad('atlas.h5ad')
@@ -33,8 +52,8 @@ num_locations = 3039
 locations_apriori = locations[:num_locations][['xcoord', 'ycoord', 'zcoord']].values
 
 # Performing the leave-one-out cross-validation
-result_matrix=pd.DataFrame(columns=['atlas gene','spearman score'])
-random_matrix=pd.DataFrame(columns=['atlas gene','iter','spearman score'])
+result_matrix=pd.DataFrame(columns=['atlas gene','ssim score'])
+random_matrix=pd.DataFrame(columns=['atlas gene','iter','ssim score'])
 for gene in atlas_genes:
 	print(gene)
 
@@ -63,48 +82,37 @@ for gene in atlas_genes:
 	dataset_reconst.obsm['spatial'] = locations_apriori
 
     # normalizing the values observed after the reconstruction and in the atlas
-	y_test=np.array(sc.get.obs_df(dataset_reconst,keys=gene))
-	y_test= (y_test-np.min(y_test))/(np.max(y_test)-np.min(y_test))
-	y_truth=np.array(sc.get.obs_df(atlas,keys=gene))
-	y_truth= (y_truth-np.min(y_truth))/(np.max(y_truth)-np.min(y_truth))
+	A=atlas[:,gene].X
+	A=(A-np.min(A))/(np.max(A)-np.min(A))
+	A=A.reshape(1,-1)
+	B=dataset_reconst[:,gene].X
+	B=(B-np.min(B))/(np.max(B)-np.min(B))
+	B=B.reshape(1,-1)
 
-    # Perform the spearman correlation between the reconstruction and the atlas
-	spearman_score=stats.spearmanr(y_test,y_truth)
-	result_matrix.loc[len(result_matrix)]=[gene,spearman_score]
+	# Perform the spearman correlation between the reconstruction and the atlas
+	ssim_score=ssim_1d_manual(A,B)
+	result_matrix.loc[len(result_matrix)]=[gene,ssim_score]
 
     # Perform a "random" reconstruction 100 times and save the spearman score in another table. 
 	for i in range(100):
-		y_test_random=y_test
-		random.Random(i).shuffle(y_test_random) 
-		spearman_score=stats.spearmanr(y_test_random,y_truth)
-		random_matrix.loc[len(random_matrix)]=[gene,i+1,spearman_score]
+		B_random=B
+		random.Random(i).shuffle(B_random[0]) # Random(i) permet d'avoir la même seed à chaque fois qu'on fera retourner le script
+		ssim_score=ssim_1d_manual(B_random,A)
+		random_matrix.loc[len(random_matrix)]=[gene,i+1,ssim_score]
 
-result_matrix.to_csv("atlas_spearman_correlation.csv")
-random_matrix.to_csv("random_spearman_correlation.csv")
-
-# Extract the score and pvalue with regular expression
-s=r'\b(\d\.\d+)\b'
-p=r'\b(\d\.\d+e?-?\d+|0\.0)\b'
-result_matrix['actual score']=result_matrix['spearman score'].str.extract(s,expand=False).astype(float)
-result_matrix['actual pvalue']=result_matrix['spearman score'].str.findall(p).str[-1].astype(float)
-
-p=r'\b(\-?\d\.\d+e?-?\d+|0\.0)\b'
-random_matrix['actual score']=random_matrix['spearman score'].str.findall(p).str[0]
-random_matrix['actual score']=random_matrix['actual score'].astype(float)
-random_matrix['actual pvalue']=random_matrix['spearman score'].str.findall(p).str[-1]
-random_matrix['actual pvalue']=random_matrix['actual pvalue'].astype(float)
+result_matrix.to_csv("atlas_ssim_correlation.csv")
+random_matrix.to_csv("random_ssim_correlation.csv")
 
 # Make a boxplot comparing the corss-validation to a random reconstructions
-mydict={"non random":result_matrix["actual score"],"random":random_matrix['actual score']}
+mydict={"non random":result_matrix["ssim score"],"random":random_matrix['ssim score']}
 fig, ax = plt.subplots()
 ax.boxplot(mydict.values(),widths=0.5)
 ax.set_xticklabels(mydict.keys(),fontsize=15)
-ax.set_ylabel('spearman correlation', fontsize=15)
-plt.savefig('boxplot_spearman_corr.png')
+ax.set_ylabel('ssim correlation', fontsize=15)
+plt.savefig('boxplot_ssim_corr.png')
 
-# Calculate a ks-test to compare the distribution between the cross-validation and the random reconstructions
-print(stats.kstest(spearman_table["actual score"],spearman_random["actual score"]))
+print(stats.kstest(spearman_table["ssim score"],spearman_random["ssim score"]))
 
 # Save the 5 genes with the highest and lowest spearman scores
-result_matrix.nlargest(5,columns="actual score",keep="first").to_csv("highest_spearman_score.csv")
-result_matrix.nlowest(5,columns="actual score",keep="first").to_csv("lowest_spearman_score.csv")
+result_matrix.nlargest(5,columns="ssim score",keep="first").to_csv("highest_ssim_score.csv")
+result_matrix.nlowest(5,columns="ssim score",keep="first").to_csv("lowest_ssim_score.csv")
